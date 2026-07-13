@@ -29,6 +29,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -207,10 +210,37 @@ fun ResultScreen(
 
             Spacer(Modifier.height(24.dp))
 
+            // Meal type selector
+            Spacer(Modifier.height(16.dp))
+            var mealType by remember { mutableStateOf("lunch") }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("breakfast" to "早餐", "lunch" to "午餐", "dinner" to "晚餐", "snack" to "加餐").forEach { (key, label) ->
+                    Surface(
+                        onClick = { mealType = key },
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (mealType == key) BrandOrange else Color.White,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            label,
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (mealType == key) Color(0xFF3D2E1F) else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
             // Save button
             Button(
                 onClick = {
-                    viewModel.saveMeal(imagePath, analysis, "lunch")
+                    viewModel.saveMeal(imagePath, analysis, mealType)
                 },
                 enabled = uiState.savedMealId == null,
                 colors = ButtonDefaults.buttonColors(containerColor = BrandOrange),

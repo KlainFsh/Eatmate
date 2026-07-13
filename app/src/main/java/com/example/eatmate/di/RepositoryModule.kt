@@ -1,7 +1,9 @@
 package com.example.eatmate.di
 
+import com.example.eatmate.data.repository.ChatRepositoryImpl
 import com.example.eatmate.data.repository.FoodAnalysisRepositoryImpl
 import com.example.eatmate.data.repository.MealRepositoryImpl
+import com.example.eatmate.domain.repository.ChatRepository
 import com.example.eatmate.domain.repository.FoodAnalysisRepository
 import com.example.eatmate.domain.repository.MealRepository
 import dagger.Binds
@@ -21,4 +23,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindFoodAnalysisRepository(impl: FoodAnalysisRepositoryImpl): FoodAnalysisRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRepository(impl: ChatRepositoryImpl): ChatRepository
 }

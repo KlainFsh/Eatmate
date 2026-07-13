@@ -2,6 +2,7 @@ package com.example.eatmate.di
 
 import com.example.eatmate.BuildConfig
 import com.example.eatmate.data.remote.QwenApiService
+import com.example.eatmate.data.remote.QwenChatService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,9 +46,9 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
             .addInterceptor(logging)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
             .build()
     }
 
@@ -68,5 +69,11 @@ object NetworkModule {
     @Singleton
     fun provideQwenApiService(retrofit: Retrofit): QwenApiService {
         return retrofit.create(QwenApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideQwenChatService(retrofit: Retrofit): QwenChatService {
+        return retrofit.create(QwenChatService::class.java)
     }
 }

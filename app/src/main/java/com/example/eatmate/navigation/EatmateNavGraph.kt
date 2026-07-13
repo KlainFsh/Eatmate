@@ -46,6 +46,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eatmate.ui.camera.CameraScreen
+import com.example.eatmate.ui.chat.ChatScreen
 import com.example.eatmate.ui.diary.DiaryScreen
 import com.example.eatmate.ui.home.HomeScreen
 import com.example.eatmate.ui.profile.ProfileScreen
@@ -75,7 +76,7 @@ fun EatmateNavGraph() {
         NavTab(Screen.Profile, "我的")
     )
 
-    // Only show bottom bar on main tabs, not on camera/result
+    // Only show bottom bar on main tabs, not on camera/result/chat
     val allMainRoutes = (leftTabs + rightTabs).map { it.screen.route }
     val showBottomBar = currentDestination?.hierarchy?.any {
         it.route in allMainRoutes
@@ -176,9 +177,14 @@ fun EatmateNavGraph() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
-                HomeScreen(onNavigateToCamera = {
-                    navController.navigate(Screen.Camera.route)
-                })
+                HomeScreen(
+                    onNavigateToCamera = {
+                        navController.navigate(Screen.Camera.route)
+                    },
+                    onNavigateToChat = {
+                        navController.navigate(Screen.Chat.route)
+                    }
+                )
             }
             composable(Screen.Diary.route) {
                 DiaryScreen()
@@ -201,6 +207,11 @@ fun EatmateNavGraph() {
                 val imagePath = Uri.decode(encoded)
                 ResultScreen(
                     imagePath = imagePath,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.Chat.route) {
+                ChatScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

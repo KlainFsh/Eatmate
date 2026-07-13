@@ -1,6 +1,7 @@
 package com.example.eatmate.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,12 +31,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.example.eatmate.domain.model.Meal
 import com.example.eatmate.ui.theme.BrandOrange
 import com.example.eatmate.ui.theme.BrandPeach
@@ -47,6 +52,7 @@ import kotlin.math.roundToInt
 @Composable
 fun HomeScreen(
     onNavigateToCamera: () -> Unit,
+    onNavigateToChat: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -68,8 +74,12 @@ fun HomeScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        // Today summary
+        // Today summary with goal comparison
         val nutrition = uiState.todayNutrition
+        val goal = uiState.userGoal
+        val progress = uiState.calorieProgress
+        val overBudget = progress > 1f
+
         Surface(color = BrandPeach, shape = RoundedCornerShape(24.dp),
             modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(24.dp)) {
@@ -80,7 +90,7 @@ fun HomeScreen(
                     Text(
                         text = if (nutrition.calories > 0) "${nutrition.calories.roundToInt()}" else "--",
                         style = MaterialTheme.typography.displayLarge,
-                        color = Color(0xFF3D2E1F)
+                        color = if (overBudget) Color(0xFFC62828) else Color(0xFF3D2E1F)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text("千卡", style = MaterialTheme.typography.bodyLarge,
@@ -88,32 +98,54 @@ fun HomeScreen(
                         modifier = Modifier.padding(bottom = 6.dp))
                 }
                 Spacer(Modifier.height(4.dp))
-                Text("目标 1,800 千卡", style = MaterialTheme.typography.bodyMedium,
+                val goalText = if (goal != null) "目标 ${goal.dailyCalorieTargetKcal} 千卡" else "尚未设定目标"
+                Text(goalText, style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF7A6650))
+
+                if (goal != null && nutrition.calories > 0) {
+                    Spacer(Modifier.height(12.dp))
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.fillMaxWidth().height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = if (overBudget) Color(0xFFEF5350) else BrandOrange,
+                        trackColor = Color.White.copy(alpha = 0.4f),
+                        strokeCap = StrokeCap.Round,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    val pct = (progress * 100).roundToInt()
+                    Text(
+                        if (overBudget) "已超出 ${(pct - 100)}%" else "已摄入 ${pct}%",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (overBudget) Color(0xFFC62828) else Color(0xFF7A6650)
+                    )
+                }
             }
         }
 
         Spacer(Modifier.height(20.dp))
 
-        // Quick camera action
+        // Enen chat card — primary feature
         Card(
-            onClick = onNavigateToCamera,
+            onClick = onNavigateToChat,
             colors = CardDefaults.cardColors(containerColor = BrandOrange),
             shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()
         ) {
             Row(Modifier.fillMaxWidth().padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                Surface(color = Color.White.copy(alpha = 0.25f),
-                    shape = CircleShape, modifier = Modifier.size(48.dp)) {
-                    Icon(Icons.Filled.CameraAlt, null,
-                        tint = Color.White, modifier = Modifier.padding(12.dp))
+                Box(
+                    modifier = Modifier.size(56.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.25f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("💬", fontSize = 24.sp)
                 }
-                Spacer(Modifier.width(16.dp))
+                Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("拍照识别食物", style = MaterialTheme.typography.titleMedium,
+                    Text("恩恩 · AI营养师", style = MaterialTheme.typography.titleMedium,
                         color = Color.White, fontWeight = FontWeight.SemiBold)
-                    Text("一键获取热量与营养素", style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.8f))
+                    Text("拍照或聊聊今天吃了什么，获取专属营养建议",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.85f))
                 }
             }
         }

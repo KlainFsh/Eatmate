@@ -66,4 +66,11 @@ sealed class Screen(
     ) {
         fun createRoute(imagePath: String) = "result/${Uri.encode(imagePath)}"
     }
+
+    data object Chat : Screen(
+        route = "chat",
+        label = "聊天",
+        selectedIcon = Icons.Filled.CameraAlt,
+        unselectedIcon = Icons.Outlined.CameraAlt
+    )
 }
