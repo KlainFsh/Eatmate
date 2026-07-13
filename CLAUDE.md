@@ -111,16 +111,15 @@
 - [ ] `gradle/libs.versions.toml` 中 Hilt/Room/Retrofit/CameraX 版本已添加
 - [ ] 主题文件 Color/Theme/Shape/Type 已替换为品牌色板
 - [ ] `AndroidManifest.xml` 中相机权限已声明
-- [ ] 百度/阿里云 API Key 已配置在 `local.properties`
+- [x] 阿里云 API Key 已配置在 `local.properties`
 
 ---
 
-## 七、当前状态 (2026-07-03)
+## 七、当前状态 (2026-07-13)
 
-- [x] 项目评估与技术选型完成
-- [x] AI 方案确定: Qwen3.6-Plus
-- [x] 品牌视觉 v2.0 确定
-- [x] 主题文件重写并编译通过
-- [x] ShutterButton 组件完成
-- [x] 项目标准化文件创建
-- [ ] Phase 1 开发启动
+- [x] Phase 0: 技术选型 + 品牌视觉 + 标准化文件
+- [x] Phase 1: 依赖引入 + 目录骨架 + 5 Tab 导航 + CameraX + 主题
+- [x] Phase 2: Room 建表 + Retrofit 网络层 + Qwen API 封装 + 图片压缩 + 拍照→分析→结果→保存完整闭环
+- [ ] Phase 3: 饮食日记（真实数据 + 日汇总 + 日期切换）
+- [ ] Phase 4: 用户目标设定
+- [ ] Phase 5: 打磨（加载动画 + 纠错 + 启动页）

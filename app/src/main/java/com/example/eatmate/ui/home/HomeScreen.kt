@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -26,249 +25,186 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.eatmate.ui.components.ShutterButton
-import com.example.eatmate.ui.theme.BrandGreen
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import com.example.eatmate.domain.model.Meal
 import com.example.eatmate.ui.theme.BrandOrange
 import com.example.eatmate.ui.theme.BrandPeach
 import com.example.eatmate.ui.theme.CarbYellow
 import com.example.eatmate.ui.theme.FatCoral
 import com.example.eatmate.ui.theme.ProteinPurple
 import com.example.eatmate.ui.theme.SurfaceLight
+import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen(
-    onNavigateToCamera: () -> Unit
+    onNavigateToCamera: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Refresh when returning to this screen
+    LaunchedEffect(Unit) {
+        viewModel.loadData()
+    }
+
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // Greeting
-        Text(
-            text = "早上好 ☀️",
-            style = MaterialTheme.typography.headlineLarge
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "今天吃对了吗？",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Text("早上好 ☀️", style = MaterialTheme.typography.headlineLarge)
+        Spacer(Modifier.height(4.dp))
+        Text("今天吃对了吗？", style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // Today's summary card
-        TodaySummaryCard()
+        // Today summary
+        val nutrition = uiState.todayNutrition
+        Surface(color = BrandPeach, shape = RoundedCornerShape(24.dp),
+            modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text("今日摄入", style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFF5C4322))
+                Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = if (nutrition.calories > 0) "${nutrition.calories.roundToInt()}" else "--",
+                        style = MaterialTheme.typography.displayLarge,
+                        color = Color(0xFF3D2E1F)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("千卡", style = MaterialTheme.typography.bodyLarge,
+                        color = Color(0xFF7A6650),
+                        modifier = Modifier.padding(bottom = 6.dp))
+                }
+                Spacer(Modifier.height(4.dp))
+                Text("目标 1,800 千卡", style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF7A6650))
+            }
+        }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(Modifier.height(20.dp))
 
-        // Quick-action camera card
+        // Quick camera action
         Card(
             onClick = onNavigateToCamera,
             colors = CardDefaults.cardColors(containerColor = BrandOrange),
-            shape = RoundedCornerShape(24.dp),
-            modifier = Modifier.fillMaxWidth()
+            shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    color = Color.White.copy(alpha = 0.25f),
-                    shape = CircleShape,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.CameraAlt,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.padding(12.dp)
-                    )
+            Row(Modifier.fillMaxWidth().padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Surface(color = Color.White.copy(alpha = 0.25f),
+                    shape = CircleShape, modifier = Modifier.size(48.dp)) {
+                    Icon(Icons.Filled.CameraAlt, null,
+                        tint = Color.White, modifier = Modifier.padding(12.dp))
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "拍照识别食物",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = "一键获取热量与营养素",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
+                Spacer(Modifier.width(16.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("拍照识别食物", style = MaterialTheme.typography.titleMedium,
+                        color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text("一键获取热量与营养素", style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.8f))
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // Nutrition breakdown
-        Text(
-            text = "今日营养素",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            MacroCard(
-                label = "蛋白质",
-                value = "-- g",
-                color = ProteinPurple,
-                modifier = Modifier.weight(1f)
-            )
-            MacroCard(
-                label = "碳水",
-                value = "-- g",
-                color = CarbYellow,
-                modifier = Modifier.weight(1f)
-            )
-            MacroCard(
-                label = "脂肪",
-                value = "-- g",
-                color = FatCoral,
-                modifier = Modifier.weight(1f)
-            )
+        // Macros
+        Text("今日营养素", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(12.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            MacroCard("蛋白质", formatGrams(nutrition.protein), ProteinPurple, Modifier.weight(1f))
+            MacroCard("碳水", formatGrams(nutrition.carb), CarbYellow, Modifier.weight(1f))
+            MacroCard("脂肪", formatGrams(nutrition.fat), FatCoral, Modifier.weight(1f))
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // Recent meals preview
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "最近记录",
-                style = MaterialTheme.typography.titleMedium
-            )
+        // Recent meals
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+            Text("最近记录", style = MaterialTheme.typography.titleMedium)
             TextButton(onClick = { /* navigate to diary */ }) {
                 Text("查看全部")
             }
         }
 
-        // Empty state
-        Spacer(modifier = Modifier.height(8.dp))
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Restaurant,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    modifier = Modifier.size(40.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "还没有记录",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "拍张照片开始记录吧",
+        Spacer(Modifier.height(8.dp))
+        if (uiState.recentMeals.isEmpty()) {
+            Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.fillMaxWidth().padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Filled.Restaurant, null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.size(40.dp))
+                    Spacer(Modifier.height(8.dp))
+                    Text("还没有记录", style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("拍张照片开始记录吧", style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                }
+            }
+        } else {
+            uiState.recentMeals.forEach { meal ->
+                RecentMealItem(meal)
+            }
+        }
+    }
+}
+
+@Composable
+private fun MacroCard(label: String, value: String, color: Color, modifier: Modifier) {
+    Surface(color = SurfaceLight, shape = RoundedCornerShape(16.dp), modifier = modifier) {
+        Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Surface(color = color.copy(alpha = 0.25f), shape = CircleShape,
+                modifier = Modifier.size(12.dp)) {}
+            Spacer(Modifier.height(8.dp))
+            Text(value, style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold)
+            Text(label, style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun RecentMealItem(meal: Meal) {
+    Surface(color = SurfaceLight, shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(color = BrandOrange.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(10.dp), modifier = Modifier.size(40.dp)) {
+                Text("🍽", modifier = Modifier.padding(8.dp),
+                    style = MaterialTheme.typography.titleMedium)
+            }
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(meal.dishes.firstOrNull()?.name ?: "餐食",
+                    style = MaterialTheme.typography.titleMedium)
+                Text("${meal.nutrition.calories.roundToInt()} 千卡",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            val typeLabels = mapOf("breakfast" to "早","lunch" to "午","dinner" to "晚","snack" to "加")
+            Surface(color = BrandPeach, shape = RoundedCornerShape(6.dp)) {
+                Text(typeLabels[meal.mealType] ?: "", modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                    style = MaterialTheme.typography.labelSmall, color = Color(0xFF5C4322))
             }
         }
     }
 }
 
-@Composable
-private fun TodaySummaryCard() {
-    Surface(
-        color = BrandPeach,
-        shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Text(
-                text = "今日摄入",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF5C4322)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    text = "--",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = Color(0xFF3D2E1F),
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "千卡",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color(0xFF7A6650),
-                    modifier = Modifier.padding(bottom = 6.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "目标 1,800 千卡",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF7A6650)
-            )
-        }
-    }
-}
-
-@Composable
-private fun MacroCard(
-    label: String,
-    value: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        color = SurfaceLight,
-        shape = RoundedCornerShape(16.dp),
-        modifier = modifier
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Surface(
-                color = color.copy(alpha = 0.25f),
-                shape = CircleShape,
-                modifier = Modifier.size(12.dp)
-            ) {}
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
+private fun formatGrams(value: Float): String =
+    if (value > 0) "${value.roundToInt()} g" else "-- g"

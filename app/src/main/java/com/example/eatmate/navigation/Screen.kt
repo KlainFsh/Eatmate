@@ -1,5 +1,6 @@
 package com.example.eatmate.navigation
 
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.DateRange
@@ -63,6 +64,6 @@ sealed class Screen(
         selectedIcon = Icons.Filled.CameraAlt,
         unselectedIcon = Icons.Outlined.CameraAlt
     ) {
-        fun createRoute(imagePath: String) = "result/$imagePath"
+        fun createRoute(imagePath: String) = "result/${Uri.encode(imagePath)}"
     }
 }

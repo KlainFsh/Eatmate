@@ -1,5 +1,6 @@
 package com.example.eatmate.navigation
 
+import android.net.Uri
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -164,17 +165,7 @@ fun EatmateNavGraph() {
                         }
                     }
 
-                    // Floating camera button — overlays the nav bar center
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .offset(y = (-20).dp)
-                    ) {
-                        CameraNavButton(
-                            isProminent = true,
-                            onClick = { navController.navigate(Screen.Camera.route) }
-                        )
-                    }
+                    // Camera button is inline in the nav bar row above
                 }
             }
         }
@@ -206,7 +197,8 @@ fun EatmateNavGraph() {
                 ProfileScreen()
             }
             composable(Screen.Result.route) { backStackEntry ->
-                val imagePath = backStackEntry.arguments?.getString("imagePath") ?: ""
+                val encoded = backStackEntry.arguments?.getString("imagePath") ?: ""
+                val imagePath = Uri.decode(encoded)
                 ResultScreen(
                     imagePath = imagePath,
                     onNavigateBack = { navController.popBackStack() }
